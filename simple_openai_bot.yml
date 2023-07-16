@@ -1,6 +1,6 @@
 version: '3.1'
 services:
   app:
-    image: bro3jo2/simple_openai_bot:latest
+    image: bro3jo2/simpleopenaibot:latest
     volumes:
       - ./user_data:/simple_openai_bot/user_data
