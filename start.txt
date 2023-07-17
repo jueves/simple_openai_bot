@@ -1,0 +1,3 @@
+¡Hola! Mi nombre es LoRobot y soy un bot de Telegram que interactúa con Whisper y ChatGPT.
+Si me escribes un mensaje actuaré como ChatGPT respondiendo tus dudas.
+Si envías un mensaje de voz, lo convertiré a texto y te responderé con mi transcripción.
