@@ -18,9 +18,25 @@ openai.api_key = keys_dic["chatGPT"]
 messages = [ {"role": "system", "content": "You are a intelligent assistant."} ]
 
 # Setup Whisper
-model_types = ["tiny", "base", "small", "medium", "large"]
-selected_model = "base"
-whisper_model = whisper.load_model(selected_model)
+model_types = ["tiny", "base", "small", "medium"] # "large model doesn't work for some reason. Hardware?"
+
+# Setup Whisper
+class WhisperModel:
+    def __init__(self, model_type):
+        self.set_type(model_type)
+
+    def set_type(self, model_type):
+        self.model_type = model_type
+        self.model = whisper.load_model(model_type)
+    
+    def get_type(self):
+        return(self.model_type)
+    
+    def transcribe(self, file_name):
+        text = self.model.transcribe(file_name)
+        return(text)
+
+whisper_model = WhisperModel("base")
 
 # Setup Telegram bot
 bot = telebot.TeleBot(keys_dic["telegram"])
@@ -58,11 +74,10 @@ def echo_all(message):
         answer = help_message
     elif (message.text[1:] in model_types):
         bot.reply_to(message, "Cargando modelo...")
-        selected_model = message.text[1:]
-        whisper_model = whisper.load_model(selected_model) # No carga, fuera de scope.
-        answer = "Modelo " + selected_model + " cargado."
-    elif (message.text == "/modelo"):
-        answer = "El modelo de Whisper en uso es " + selected_model
+        whisper_model.set_type(message.text[1:])
+        answer = "Modelo " + whisper_model.get_type() + " cargado."
+    elif (message.text in ["/modelo", "/model"]):
+        answer = "El modelo de Whisper en uso es " + whisper_model.get_type()
     else:
         answer = get_answer(message)
 

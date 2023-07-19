@@ -7,4 +7,3 @@ Lo siguientes comandos cambian el modelo en que se basa Whisper. Cuanto mayor el
 /base
 /small
 /medium
-/large
