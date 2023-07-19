@@ -13,6 +13,9 @@ with open("start.txt", "r", encoding="utf-8") as f:
 with open("help.txt", "r", encoding="utf-8") as f:
     help_message = f.read()
 
+with open("prompt.txt", "r", encoding="utf-8") as f:
+    prompt = f.read()
+
 # Setup chatGPT
 openai.api_key = keys_dic["chatGPT"]
 messages = [ {"role": "system", "content": "You are a intelligent assistant."} ]
@@ -51,7 +54,7 @@ def get_answer(message, summary=False):
     text = message.text
     header = ""
     if (summary):
-        text = "Extrae los puntos clave del siguiente texto en no más de 100 palabras:\n" + text
+        text =  prompt + "\n" + text
         header = "Resumen:\n"
     messages.append({"role": "user", "content": text})
     chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
@@ -91,6 +94,6 @@ def echo_all(message):
     else:
         answer = get_answer(message)
 
-    bot.reply_to(message, answer)
+    bot.reply_to(message, answer, parse_mode='Markdown')
 
 bot.infinity_polling()
