@@ -18,7 +18,9 @@ openai.api_key = keys_dic["chatGPT"]
 messages = [ {"role": "system", "content": "You are a intelligent assistant."} ]
 
 # Setup Whisper
-model_types = ["tiny", "base", "small", "medium"] # "large model doesn't work for some reason. Hardware?"
+model_types = ["tiny", "base", "small", "medium"] # "large" model doesn't work on my 
+                                                  # server due to memory limitations,
+                                                  # so I removed it.
 
 # Setup Whisper
 class WhisperModel:
