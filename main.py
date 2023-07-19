@@ -43,15 +43,21 @@ whisper_model = WhisperModel("base")
 # Setup Telegram bot
 bot = telebot.TeleBot(keys_dic["telegram"])
 
-def get_answer(message):
+def get_answer(message, summary=False):
     '''
     Takes a Telebot message oject, passes its text to chatGPT
     and returns the answer.
     '''
-    messages.append({"role": "user", "content": message.text})
+    text = message.text
+    header = ""
+    if (summary):
+        text = "Extrae los puntos clave del siguiente texto en no más de 100 palabras:\n" + text
+        header = "Resumen:\n"
+    messages.append({"role": "user", "content": text})
     chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
     reply = chat.choices[0].message.content
-    return(reply)
+    return(header + reply)
+
 
 @bot.message_handler(content_types=['voice'])
 def voice_processing(message):
@@ -60,7 +66,7 @@ def voice_processing(message):
     file_name = "user_data/" + str(message.from_user.id) + "_voice.ogg"
     with open(file_name, 'wb') as new_file:
         new_file.write(downloaded_file)
-    bot.reply_to(message, "Processing audio...")
+    bot.reply_to(message, "Procesando audio...")
     result = whisper_model.transcribe(file_name)
     bot.reply_to(message, result["text"])
 
@@ -80,6 +86,8 @@ def echo_all(message):
         answer = "Modelo " + whisper_model.get_type() + " cargado."
     elif (message.text in ["/modelo", "/model"]):
         answer = "El modelo de Whisper en uso es " + whisper_model.get_type()
+    elif (message.reply_to_message is not None):
+        answer = get_answer(message.reply_to_message, summary=True)
     else:
         answer = get_answer(message)
 
