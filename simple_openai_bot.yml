@@ -4,4 +4,5 @@ services:
     image: bro3jo2/simpleopenaibot:latest
     volumes:
       - ./user_data:/simple_openai_bot/user_data
-      
+    environment:
+      - MODELS=tiny,base,small,medium

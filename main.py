@@ -2,6 +2,11 @@ import json
 import openai
 import telebot
 import whisper
+import os
+
+print("Versión con variables de entorno.")
+model_types = os.environ.get("MODELS", "tiny,base,small").split(",")
+print(model_types)
 
 # Load keys
 with open("user_data/keys.json", "r", encoding="utf-8") as f:
@@ -19,11 +24,6 @@ with open("prompt.txt", "r", encoding="utf-8") as f:
 # Setup chatGPT
 openai.api_key = keys_dic["chatGPT"]
 messages = [ {"role": "system", "content": "You are a intelligent assistant."} ]
-
-# Setup Whisper
-model_types = ["tiny", "base", "small", "medium"] # "large" model doesn't work on my 
-                                                  # server due to memory limitations,
-                                                  # so I removed it.
 
 # Setup Whisper
 class WhisperModel:
