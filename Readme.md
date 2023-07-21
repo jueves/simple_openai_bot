@@ -9,4 +9,5 @@ Telegram comands:
 - `/tiny`, `/base`, `/small` and `/medium` change the Whisper model. _Large_ model is removed due to limitations in the hardware the program runs.
 
 # To do
-- [ ] Add option to easily set from the server side the models that will be available to users.
+- [X] Add option to easily set from the server side the models that will be available to users.
+- [ ] Manage concurrence regarding diferent model types being used.

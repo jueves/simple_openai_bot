@@ -6,3 +6,5 @@ services:
       - ./user_data:/simple_openai_bot/user_data
     environment:
       - MODELS=tiny,base,small,medium
+      - TELEGRAM_KEY=${TELEGRAM_KEY}
+      - CHATGPT_KEY=${CHATGPT_KEY}

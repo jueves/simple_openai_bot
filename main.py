@@ -4,47 +4,32 @@ import telebot
 import whisper
 import os
 
-print("Versión con variables de entorno.")
-model_types = os.environ.get("MODELS", "tiny,base,small").split(",")
-print(model_types)
+# Load variables
+model_types = os.environ.get("MODELS", "tiny,base").split(",")
+telegram_key = os.environ.get("TELEGRAM_KEY")
+chatGPT_key = os.environ.get("CHATGPT_KEY")
 
-# Load keys
-with open("user_data/keys.json", "r", encoding="utf-8") as f:
-    keys_dic = json.load(f)
 
 with open("start.txt", "r", encoding="utf-8") as f:
     start_message = f.read()
 
 with open("help.txt", "r", encoding="utf-8") as f:
     help_message = f.read()
+for model in model_types:
+    help_message += "/" + model + "\n"
 
 with open("prompt.txt", "r", encoding="utf-8") as f:
     prompt = f.read()
 
 # Setup chatGPT
-openai.api_key = keys_dic["chatGPT"]
+openai.api_key = chatGPT_key
 messages = [ {"role": "system", "content": "You are a intelligent assistant."} ]
 
 # Setup Whisper
-class WhisperModel:
-    def __init__(self, model_type):
-        self.set_type(model_type)
-
-    def set_type(self, model_type):
-        self.model_type = model_type
-        self.model = whisper.load_model(model_type)
-    
-    def get_type(self):
-        return(self.model_type)
-    
-    def transcribe(self, file_name):
-        text = self.model.transcribe(file_name)
-        return(text)
-
-whisper_model = WhisperModel("base")
+audio2text = {"model": whisper.load_model("base"), "type": "base"}
 
 # Setup Telegram bot
-bot = telebot.TeleBot(keys_dic["telegram"])
+bot = telebot.TeleBot(telegram_key)
 
 def get_answer(message, summary=False):
     '''
@@ -70,7 +55,7 @@ def voice_processing(message):
     with open(file_name, 'wb') as new_file:
         new_file.write(downloaded_file)
     bot.reply_to(message, "Procesando audio...")
-    result = whisper_model.transcribe(file_name)
+    result = audio2text["model"].transcribe(file_name)
     bot.reply_to(message, result["text"])
 
 
@@ -85,10 +70,11 @@ def echo_all(message):
         answer = help_message
     elif (message.text[1:] in model_types):
         bot.reply_to(message, "Cargando modelo...")
-        whisper_model.set_type(message.text[1:])
-        answer = "Modelo " + whisper_model.get_type() + " cargado."
+        audio2text["type"] = message.text[1:]
+        audio2text["model"] = whisper.load_model(message.text[1:])
+        answer = "Modelo " + audio2text["type"] + " cargado."
     elif (message.text in ["/modelo", "/model"]):
-        answer = "El modelo de Whisper en uso es " + whisper_model.get_type()
+        answer = "El modelo de Whisper en uso es " + audio2text["type"]
     elif (message.reply_to_message is not None):
         answer = get_answer(message.reply_to_message, summary=True)
     else:
