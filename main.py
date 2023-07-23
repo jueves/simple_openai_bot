@@ -9,7 +9,6 @@ model_types = os.environ.get("MODELS", "tiny,base").split(",")
 telegram_key = os.environ.get("TELEGRAM_KEY")
 chatGPT_key = os.environ.get("CHATGPT_KEY")
 
-
 with open("start.txt", "r", encoding="utf-8") as f:
     start_message = f.read()
 
