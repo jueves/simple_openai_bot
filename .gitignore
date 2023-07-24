@@ -161,3 +161,4 @@ cython_debug/
 
 user_data/keys.json
 user_data/*voice.ogg
+simple_openai_bot_test.yml
