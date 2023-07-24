@@ -46,8 +46,9 @@ def get_answer(message, summary=False):
     return(header + reply)
 
 
-@bot.message_handler(content_types=['voice'])
+@bot.message_handler(content_types=['voice', 'audio'])
 def voice_processing(message):
+    print("mensaje de audio o de voz detectado")
     file_info = bot.get_file(message.voice.file_id)
     downloaded_file = bot.download_file(file_info.file_path)
     file_name = "user_data/" + str(message.from_user.id) + "_voice.ogg"
