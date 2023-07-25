@@ -1,8 +1,7 @@
-import json
+import os
 import openai
 import telebot
 import whisper
-import os
 
 # Load variables
 model_types = os.environ.get("MODELS", "tiny,base").split(",")
@@ -22,7 +21,8 @@ with open("prompt.txt", "r", encoding="utf-8") as f:
 
 # Setup chatGPT
 openai.api_key = chatGPT_key
-messages = [ {"role": "system", "content": "You are a intelligent assistant."} ]
+messages_dic = { "default": [ {"role": "system", "content": "You are a intelligent assistant."} ] }
+#messages = [ {"role": "system", "content": "You are a intelligent assistant."} ]
 
 # Setup Whisper
 audio2text = {"model": whisper.load_model("base"), "type": "base"}
@@ -35,20 +35,23 @@ def get_answer(message, summary=False):
     Takes a Telebot message oject, passes its text to chatGPT
     and returns the answer.
     '''
+    if (message.from_user.id not in messages_dic):
+        messages_dic[message.from_user.id] =  [{'role': 'system', 'content': 'You are a intelligent assistant.'}]
+    
     text = message.text
     header = ""
     if (summary):
         text =  prompt + "\n" + text
         header = "Resumen:\n"
-    messages.append({"role": "user", "content": text})
-    chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
+
+    messages_dic[message.from_user.id].append({"role": "user", "content": text})
+    chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages_dic[message.from_user.id])
     reply = chat.choices[0].message.content
     return(header + reply)
 
 
-@bot.message_handler(content_types=['voice', 'audio'])
+@bot.message_handler(content_types=['voice'])
 def voice_processing(message):
-    print("mensaje de audio o de voz detectado")
     file_info = bot.get_file(message.voice.file_id)
     downloaded_file = bot.download_file(file_info.file_path)
     file_name = "user_data/" + str(message.from_user.id) + "_voice.ogg"

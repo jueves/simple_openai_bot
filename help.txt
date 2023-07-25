@@ -3,7 +3,3 @@ Estos son mis comandos:
 /ayuda Muestra mis comandos.
 /modelo Muestra el modelo de Whisper en uso.
 Lo siguientes comandos cambian el modelo en que se basa Whisper. Cuanto mayor el modelo mejor la transcripción y más largo el tiempo de procesamiento.
-/tiny
-/base
-/small
-/medium
