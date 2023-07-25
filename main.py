@@ -21,8 +21,7 @@ with open("prompt.txt", "r", encoding="utf-8") as f:
 
 # Setup chatGPT
 openai.api_key = chatGPT_key
-messages_dic = { "default": [ {"role": "system", "content": "You are a intelligent assistant."} ] }
-#messages = [ {"role": "system", "content": "You are a intelligent assistant."} ]
+messages_dic = {}
 
 # Setup Whisper
 audio2text = {"model": whisper.load_model("base"), "type": "base"}
