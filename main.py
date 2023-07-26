@@ -24,7 +24,7 @@ openai.api_key = chatGPT_key
 messages_dic = {}
 
 # Setup Whisper
-audio2text = {"model": whisper.load_model("base"), "type": "base"}
+audio2text = {"model": whisper.load_model("base"), "type": "base", "available":True}
 
 # Setup Telegram bot
 bot = telebot.TeleBot(telegram_key)
@@ -51,14 +51,20 @@ def get_answer(message, summary=False):
 
 @bot.message_handler(content_types=['voice'])
 def voice_processing(message):
-    file_info = bot.get_file(message.voice.file_id)
-    downloaded_file = bot.download_file(file_info.file_path)
-    file_name = "user_data/" + str(message.from_user.id) + "_voice.ogg"
-    with open(file_name, 'wb') as new_file:
-        new_file.write(downloaded_file)
-    bot.reply_to(message, "Procesando audio...")
-    result = audio2text["model"].transcribe(file_name)
-    bot.reply_to(message, result["text"])
+    if audio2text["available"]:
+        audio2text["available"] = False
+        file_info = bot.get_file(message.voice.file_id)
+        downloaded_file = bot.download_file(file_info.file_path)
+        file_name = "user_data/" + str(message.from_user.id) + "_voice.ogg"
+        with open(file_name, 'wb') as new_file:
+            new_file.write(downloaded_file)
+        bot.reply_to(message, "Procesando audio...")
+        result = audio2text["model"].transcribe(file_name)
+        bot.reply_to(message, result["text"])
+        audio2text["available"] = True
+    else:
+        bot.reply_to(message, "El modelo Whisper está ocupado, inténtelo de " +
+                              "nuevo en unos minutos.")
 
 
 @bot.message_handler(func=lambda msg: True)
