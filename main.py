@@ -55,7 +55,7 @@ def voice_processing(message):
         audio2text["available"] = False
         file_info = bot.get_file(message.voice.file_id)
         downloaded_file = bot.download_file(file_info.file_path)
-        file_name = "user_data/" + str(message.from_user.id) + "_voice.ogg"
+        file_name = str(message.from_user.id) + "_voice.ogg"
         with open(file_name, 'wb') as new_file:
             new_file.write(downloaded_file)
         bot.reply_to(message, "Procesando audio...")
