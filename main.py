@@ -4,30 +4,31 @@ import telebot
 import whisper
 
 # Load variables
-model_types = os.environ.get("MODELS", "tiny,base").split(",")
-telegram_key = os.environ.get("TELEGRAM_KEY")
-chatGPT_key = os.environ.get("CHATGPT_KEY")
+MODEL_TYPES = os.environ.get("MODELS", "tiny,base").split(",")
+TELEGRAM_KEY = os.environ.get("TELEGRAM_KEY")
+CHATGPT_KEY = os.environ.get("CHATGPT_KEY")
+BUSY_MESSAGE = "El modelo Whisper está ocupado, inténtelo de nuevo en unos minutos."
 
 with open("start.txt", "r", encoding="utf-8") as f:
     start_message = f.read()
 
 with open("help.txt", "r", encoding="utf-8") as f:
     help_message = f.read()
-for model in model_types:
+for model in MODEL_TYPES:
     help_message += "/" + model + "\n"
 
 with open("prompt.txt", "r", encoding="utf-8") as f:
     prompt = f.read()
 
 # Setup chatGPT
-openai.api_key = chatGPT_key
+openai.api_key = CHATGPT_KEY
 messages_dic = {}
 
 # Setup Whisper
 audio2text = {"model": whisper.load_model("base"), "type": "base", "available":True}
 
 # Setup Telegram bot
-bot = telebot.TeleBot(telegram_key)
+bot = telebot.TeleBot(TELEGRAM_KEY)
 
 def get_answer(message, summary=False):
     '''
@@ -63,8 +64,7 @@ def voice_processing(message):
         bot.reply_to(message, result["text"])
         audio2text["available"] = True
     else:
-        bot.reply_to(message, "El modelo Whisper está ocupado, inténtelo de " +
-                              "nuevo en unos minutos.")
+        bot.reply_to(message, BUSY_MESSAGE)
 
 
 @bot.message_handler(func=lambda msg: True)
@@ -76,11 +76,16 @@ def echo_all(message):
         answer = start_message + help_message
     elif (message.text in ["/Ayuda", "/ayuda", "/help"]):
         answer = help_message
-    elif (message.text[1:] in model_types):
-        bot.reply_to(message, "Cargando modelo...")
-        audio2text["type"] = message.text[1:]
-        audio2text["model"] = whisper.load_model(message.text[1:])
-        answer = "Modelo " + audio2text["type"] + " cargado."
+    elif (message.text[1:] in MODEL_TYPES):
+        if audio2text["available"]:
+            audio2text["available"] = False
+            bot.reply_to(message, "Cargando modelo...")
+            audio2text["type"] = message.text[1:]
+            audio2text["model"] = whisper.load_model(message.text[1:])
+            answer = "Modelo " + audio2text["type"] + " cargado."
+            audio2text["available"] = True
+        else:
+            bot.reply_to(message, BUSY_MESSAGE)
     elif (message.text in ["/modelo", "/model"]):
         answer = "El modelo de Whisper en uso es " + audio2text["type"]
     elif (message.reply_to_message is not None):

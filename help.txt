@@ -1,5 +1,6 @@
 Estos son mis comandos:
 /start Muestra el mensaje de bienvenida.
 /ayuda Muestra mis comandos.
+Si respondes a un mensaje, se te devolverá un resumen del mismo. No importa el texto con el que respondas, puede ser simplemente un punto.
 /modelo Muestra el modelo de Whisper en uso.
 Lo siguientes comandos cambian el modelo en que se basa Whisper. Cuanto mayor el modelo mejor la transcripción y más largo el tiempo de procesamiento.
