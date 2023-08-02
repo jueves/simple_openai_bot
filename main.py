@@ -60,7 +60,7 @@ def voice_processing(message):
         with open(file_name, 'wb') as new_file:
             new_file.write(downloaded_file)
         bot.reply_to(message, "Procesando audio...")
-        result = audio2text["model"].transcribe(file_name)
+        result = audio2text["model"].transcribe(file_name, language="es")
         bot.reply_to(message, result["text"])
         audio2text["available"] = True
     else:
@@ -88,6 +88,12 @@ def echo_all(message):
             bot.reply_to(message, BUSY_MESSAGE)
     elif (message.text in ["/modelo", "/model"]):
         answer = "El modelo de Whisper en uso es " + audio2text["type"]
+    elif (message.text in ["/clear", "/limpiar"]):
+        try:
+            del messages_dic[message.from_user.id]
+        except KeyError:
+            pass
+        answer = "Historial de chatGPT borrado."
     elif (message.reply_to_message is not None):
         answer = get_answer(message.reply_to_message, summary=True)
     else:
