@@ -2,10 +2,15 @@ import os
 import openai
 import telebot
 import whisper
-from dotenv import load_dotenv
+
+# Load variables in .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except:
+    print("Error loading dotenv, .env file won't be used.")
 
 # Load variables
-load_dotenv()
 MODEL_TYPES = os.environ.get("MODELS", "tiny,base").split(",")
 TELEGRAM_KEY = os.environ.get("TELEGRAM_KEY")
 CHATGPT_KEY = os.environ.get("CHATGPT_KEY")
