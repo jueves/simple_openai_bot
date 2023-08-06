@@ -2,8 +2,10 @@ import os
 import openai
 import telebot
 import whisper
+from dotenv import load_dotenv
 
 # Load variables
+load_dotenv()
 MODEL_TYPES = os.environ.get("MODELS", "tiny,base").split(",")
 TELEGRAM_KEY = os.environ.get("TELEGRAM_KEY")
 CHATGPT_KEY = os.environ.get("CHATGPT_KEY")
@@ -77,13 +79,15 @@ def echo_all(message):
     elif (message.text in ["/Ayuda", "/ayuda", "/help"]):
         answer = help_message
     elif (message.text[1:] in MODEL_TYPES):
-        if audio2text["available"]:
+        if (message.text[1:] == audio2text["type"]):
+            answer = "El modelo {model} ya está activo.".format(model=message.text[1:])
+        elif audio2text["available"]:
             audio2text["available"] = False
             bot.reply_to(message, "Cargando modelo...")
-            audio2text["type"] = message.text[1:]
             audio2text["model"] = whisper.load_model(message.text[1:])
-            answer = "Modelo " + audio2text["type"] + " cargado."
+            audio2text["type"] = message.text[1:]
             audio2text["available"] = True
+            answer = "Modelo " + audio2text["type"] + " cargado."
         else:
             bot.reply_to(message, BUSY_MESSAGE)
     elif (message.text in ["/modelo", "/model"]):
