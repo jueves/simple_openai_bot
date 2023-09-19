@@ -78,8 +78,7 @@ def link_processing(message):
             text_file.write(answer)
         
         text_file = open(txt_file_name, "r")
-        bot.send_document(message.chat.id, "Aquí tienes la transcripción",
-                          reply_to_message_id=message.message_id, document=text_file)
+        bot.send_document(message.chat.id, reply_to_message_id=message.message_id, document=text_file)
 
        
 
