@@ -1,6 +1,6 @@
 FROM python
 
-RUN pip install openai-whisper pyTelegramBotAPI openai
+RUN pip install openai-whisper pyTelegramBotAPI openai wget
 
 RUN apt-get update && apt-get install -y ffmpeg
 

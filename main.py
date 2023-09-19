@@ -2,6 +2,7 @@ import os
 import openai
 import telebot
 import whisper
+import wget
 
 # Load variables in .env file
 try:
@@ -57,22 +58,61 @@ def get_answer(message, summary=False):
     return(header + reply)
 
 
-@bot.message_handler(content_types=['voice'])
-def voice_processing(message):
+def link_processing(message):
+    '''
+    Gets a message whose content is a URL
+    Downloads URL file
+    Replies to sender with audio file transciption.
+    '''
+    try:
+        file_name = wget.download(message.text)
+        answer = transcribe_audio(message, file_name)
+    except:
+        answer = "Ocurrió un error. ¿Seguro que el link es correcto?"
+
+    if (len(answer) < 300):
+        bot.reply_to(message, answer)
+    else:
+        txt_file_name = file_name + ".txt"
+        with open(txt_file_name, "w") as text_file:
+            text_file.write(answer)
+        
+        text_file = open(txt_file_name, "r")
+        bot.send_document(message.chat.id, "Aquí tienes la transcripción",
+                          reply_to_message_id=message.message_id, document=text_file)
+
+       
+
+def transcribe_audio(message, file_name):
+    '''
+    Gets a message whose content ask for an audio transcription and the file
+    name of that audio.
+    Returns audio transcription.
+    '''
     if audio2text["available"]:
         audio2text["available"] = False
-        file_info = bot.get_file(message.voice.file_id)
-        downloaded_file = bot.download_file(file_info.file_path)
-        file_name = str(message.from_user.id) + "_voice.ogg"
-        with open(file_name, 'wb') as new_file:
-            new_file.write(downloaded_file)
         bot.reply_to(message, "Procesando audio...")
         result = audio2text["model"].transcribe(file_name, language="es")
-        bot.reply_to(message, result["text"])
+        answer = result["text"]
         audio2text["available"] = True
     else:
-        bot.reply_to(message, BUSY_MESSAGE)
+        answer = BUSY_MESSAGE
+    return(answer)
+    
 
+@bot.message_handler(content_types=['voice'])
+def voice_processing(message):
+    '''
+    Gets a message with voice.
+    Replies to sender with voice transcription.
+    '''
+    file_info = bot.get_file(message.voice.file_id)
+    downloaded_file = bot.download_file(file_info.file_path)
+    file_name = str(message.from_user.id) + "_voice.ogg"
+    with open(file_name, 'wb') as new_file:
+        new_file.write(downloaded_file)
+    answer = transcribe_audio(message, file_name)
+    bot.reply_to(message, answer)
 
 @bot.message_handler(func=lambda msg: True)
 def echo_all(message):
@@ -97,6 +137,8 @@ def echo_all(message):
             bot.reply_to(message, BUSY_MESSAGE)
     elif (message.text in ["/modelo", "/model"]):
         answer = "El modelo de Whisper en uso es " + audio2text["type"]
+    elif (message.text[:4] == "http"):
+        answer = link_processing(message)
     elif (message.text in ["/clear", "/limpiar"]):
         try:
             del messages_dic[message.from_user.id]
