@@ -2,7 +2,6 @@ import os
 import openai
 import telebot
 import whisper
-import wget
 
 # Load variables in .env file
 try:
@@ -65,20 +64,19 @@ def link_processing(message):
     Replies to sender with audio file transciption.
     '''
     try:
-        file_name = wget.download(message.text)
-        answer = transcribe_audio(message, file_name)
+        answer = transcribe_audio(message, message.text)
     except:
         answer = "Ocurrió un error. ¿Seguro que el link es correcto?"
 
     if (len(answer) < 300):
         bot.reply_to(message, answer)
     else:
-        txt_file_name = file_name + ".txt"
+        txt_file_name = str(message.from_user.id) + "_transcrip.txt"
         with open(txt_file_name, "w") as text_file:
             text_file.write(answer)
-        
-        text_file = open(txt_file_name, "r")
-        bot.send_document(message.chat.id, reply_to_message_id=message.message_id, document=text_file)
+        with open(txt_file_name, "r") as text_file:
+            bot.send_document(message.chat.id, reply_to_message_id=message.message_id, document=text_file)
+
 
        
 
@@ -137,7 +135,8 @@ def echo_all(message):
     elif (message.text in ["/modelo", "/model"]):
         answer = "El modelo de Whisper en uso es " + audio2text["type"]
     elif (message.text[:4] == "http"):
-        answer = link_processing(message)
+        link_processing(message)
+        answer = ""
     elif (message.text in ["/clear", "/limpiar"]):
         try:
             del messages_dic[message.from_user.id]

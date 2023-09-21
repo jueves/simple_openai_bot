@@ -160,4 +160,5 @@ cython_debug/
 #.idea/
 
 *_voice.ogg
+*_transcript.txt
 simple_openai_bot_test.yml
