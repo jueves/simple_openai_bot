@@ -71,7 +71,7 @@ def link_processing(message):
     if (len(answer) < 300):
         bot.reply_to(message, answer)
     else:
-        txt_file_name = str(message.from_user.id) + "_transcrip.txt"
+        txt_file_name = str(message.from_user.id) + "_transcript.txt"
         with open(txt_file_name, "w") as text_file:
             text_file.write(answer)
         with open(txt_file_name, "r") as text_file:
