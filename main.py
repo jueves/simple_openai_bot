@@ -65,7 +65,7 @@ def link_processing(message):
     Replies to sender with audio file transciption.
     '''
     try:
-        answer = transcribe_audio(message, message.text)
+        answer = transcribe_audio(message, message.text, language=None)
     except:
         answer = "Ocurrió un error. ¿Seguro que el link es correcto?"
 
@@ -81,7 +81,7 @@ def link_processing(message):
 
        
 
-def transcribe_audio(message, file_name):
+def transcribe_audio(message, file_name, language="es"):
     '''
     Gets a message whose content ask for an audio transcription and the file
     name of that audio.
@@ -90,7 +90,7 @@ def transcribe_audio(message, file_name):
     if audio2text["available"]:
         audio2text["available"] = False
         bot.reply_to(message, "Procesando audio...")
-        result = audio2text["model"].transcribe(file_name, language="es")
+        result = audio2text["model"].transcribe(file_name, language=language)
         answer = result["text"]
         audio2text["available"] = True
     else:
