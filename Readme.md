@@ -19,4 +19,4 @@ This is a Telegram Bot, you interact with it through Telegram chat.
 - Any other text message is sent to chatGPT and its answer is returned.
 - Send any voice note and a transcription is sent back.
 - Reply (with whatever text) to a message and a summary is returned.
-- Send a URL to an audio file and you will get a transciption. If the audio is long, it can be better to set a scheduled message for late at night, because the bot could get busy for hours long.
+- Send a URL to an audio file and you will get a transciption. Depending on the model in use, the lenght of the audio and the hardware capabilities, it can be better to set a scheduled message for late at night, because the bot could get busy for hours long.
