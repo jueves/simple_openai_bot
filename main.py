@@ -12,6 +12,7 @@ except:
 
 # Load variables
 MODEL_TYPES = os.environ.get("MODELS", "tiny,base").split(",")
+DEFAULT_MODEL = os.environ.get("DEFAULT_MODEL", MODEL_TYPES[0])
 TELEGRAM_KEY = os.environ.get("TELEGRAM_KEY")
 CHATGPT_KEY = os.environ.get("CHATGPT_KEY")
 BUSY_MESSAGE = "El modelo Whisper está ocupado, inténtelo de nuevo en unos minutos."
@@ -32,7 +33,7 @@ openai.api_key = CHATGPT_KEY
 messages_dic = {}
 
 # Setup Whisper
-audio2text = {"model": whisper.load_model("base"), "type": "base", "available":True}
+audio2text = {"model": whisper.load_model(DEFAULT_MODEL), "type": DEFAULT_MODEL, "available":True}
 
 # Setup Telegram bot
 bot = telebot.TeleBot(TELEGRAM_KEY)

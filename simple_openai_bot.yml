@@ -7,3 +7,4 @@ services:
       - MODELS=tiny,base,small,medium
       - TELEGRAM_KEY=${TELEGRAM_KEY}
       - CHATGPT_KEY=${CHATGPT_KEY}
+      - DEFAULT_MODEL=${DETAULT_MODEL}
