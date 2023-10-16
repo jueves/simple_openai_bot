@@ -1,10 +1,7 @@
 version: '3.1'
 services:
-  app:
-    image: bro3jo2/simpleopenaibot:latest
+  simpleopenaibot:
+    build: https://github.com/jueves/simple_openai_bot.git
        
-    environment:
-      - MODELS=tiny,base,small,medium
-      - TELEGRAM_KEY=${TELEGRAM_KEY}
-      - CHATGPT_KEY=${CHATGPT_KEY}
-      - DEFAULT_MODEL=${DETAULT_MODEL}
+    env_file:
+      - .env
