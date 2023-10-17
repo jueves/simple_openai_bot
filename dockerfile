@@ -1,8 +1,6 @@
-FROM python
+FROM python:3.11.2
 
-RUN pip install  --pre openai --pre openai-whisper
-
-RUN pip install pyTelegramBotAPI
+RUN pip install openai==0.28.0 openai-whisper==20230918 pyTelegramBotAPI==4.13.0
 
 RUN apt-get update && apt-get install -y ffmpeg
 
