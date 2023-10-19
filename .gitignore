@@ -159,6 +159,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-*_voice.ogg
+*.ogg
 *_transcript.txt
-simple_openai_bot_test.yml

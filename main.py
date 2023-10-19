@@ -58,17 +58,8 @@ def get_answer(message, summary=False):
     return(header + reply)
 
 
-def link_processing(message):
-    '''
-    Gets a message whose content is a URL
-    Downloads URL file
-    Replies to sender with audio file transciption.
-    '''
-    try:
-        answer = transcribe_audio(message, message.text, language=None)
-    except:
-        answer = "Ocurrió un error. ¿Seguro que el link es correcto?"
-
+def reply_transcription(message, answer):
+    # Manage long answers.
     if (len(answer) < 300):
         bot.reply_to(message, answer)
     else:
@@ -79,38 +70,57 @@ def link_processing(message):
             bot.send_document(message.chat.id, reply_to_message_id=message.message_id, document=text_file)
 
 
-       
-
-def transcribe_audio(message, file_name, language="es"):
+def transcribe_audio(message, file_name, language=None):
     '''
-    Gets a message whose content ask for an audio transcription and the file
-    name of that audio.
+    Gets a message, the location of its audio file and the audio language.
     Returns audio transcription.
     '''
     if audio2text["available"]:
         audio2text["available"] = False
         bot.reply_to(message, "Procesando audio...")
-        result = audio2text["model"].transcribe(file_name, language=language)
-        answer = result["text"]
+        try:
+            result = audio2text["model"].transcribe(file_name, language=language)
+            answer = result["text"]
+        except:
+            answer = "Ocurrió un error. ¿Seguro que el link es correcto?"
         audio2text["available"] = True
     else:
         answer = BUSY_MESSAGE
     return(answer)
     
+def preprocess_audio(message):
+    '''
+    Gets a message with some type of audio
+    Returns file name and language
+    '''
+    if hasattr(message.voice, "file_id"):
+        file_info = bot.get_file(message.voice.file_id)
+        lang = "es"
+    elif hasattr(message.document, "file_id"):
+        file_info = bot.get_file(message.document.file_id)
+        lang = None
+    else:
+        file_info = bot.get_file(message.audio.file_id)
+        lang = None
 
-@bot.message_handler(content_types=['voice'])
-def voice_processing(message):
-    '''
-    Gets a message with voice.
-    Replies to sender with voice transcription.
-    '''
-    file_info = bot.get_file(message.voice.file_id)
+    # Get audio file
     downloaded_file = bot.download_file(file_info.file_path)
-    file_name = str(message.from_user.id) + "_voice.ogg"
+    file_name = str(message.from_user.id) + ".ogg"
     with open(file_name, 'wb') as new_file:
         new_file.write(downloaded_file)
-    answer = transcribe_audio(message, file_name)
-    bot.reply_to(message, answer)
+
+    return(file_name, lang)
+    
+
+@bot.message_handler(content_types=['voice', 'document', 'audio'])
+def audio_processing(message):
+    '''
+    Gets a message with audio.
+    Replies to sender with audio transcription.
+    '''
+    file_name, lang = preprocess_audio(message)
+    answer = transcribe_audio(message, file_name, language=lang)
+    reply_transcription(message, answer)
 
 @bot.message_handler(func=lambda msg: True)
 def echo_all(message):
@@ -136,7 +146,8 @@ def echo_all(message):
     elif (message.text in ["/modelo", "/model"]):
         answer = "El modelo de Whisper en uso es " + audio2text["type"]
     elif (message.text[:4] == "http"):
-        link_processing(message)
+        transcription = transcribe_audio(message, message.text, language=None)
+        reply_transcription(message, transcription)
         answer = ""
     elif (message.text in ["/clear", "/limpiar"]):
         try:
