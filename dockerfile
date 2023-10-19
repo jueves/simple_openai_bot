@@ -8,4 +8,8 @@ WORKDIR /simple_openai_bot
 
 COPY main.py start.txt help.txt prompt.txt /simple_openai_bot/
 
+LABEL name=simple_openai_bot
+
+LABEL version=0.3.4
+
 CMD python main.py
