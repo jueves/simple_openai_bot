@@ -19,11 +19,12 @@ class Whisper4Bot:
             self.available = False
             self.bot.reply_to(message, "Cargando modelo...")
             try:
-                self.model.load_model(model_type)
+                self.model = whisper.load_model(model_type)
                 self.type = model_type
                 answer = "Modelo {model} cargado.".format(model=model_type)
             except Exception as e:
                 answer = "ERROR: El modelo no pudo ser cargado.\n{error}".format(error=e)
+            self.available = True
         else:
             answer = "El modelo Whisper está ocupado, inténtelo de nuevo en unos minutos."
         return(answer)
@@ -35,20 +36,17 @@ class Whisper4Bot:
         '''
         # Dowload audio file if needed
         file_name, language = self.preprocess(message)
-
         if self.available:
             self.available = False
             self.bot.reply_to(message, "Procesando audio...")
             try:
                 result = self.model.transcribe(audio=file_name, language=language)
                 self.reply_transcription(message, result["text"])
-                answer = ""
             except Exception as e:
-                answer = "Ocurrió un error:\n{error}".format(error=e)
+                self.bot.reply_to(message, "Ocurrió un error:\n{error}".format(error=e))
             self.available = True
         else:
-            answer = "El modelo Whisper está ocupado, inténtelo de nuevo en unos minutos."
-        return(answer)
+            self.bot.reply_to(message, "El modelo Whisper está ocupado, inténtelo de nuevo en unos minutos.")
     
     def preprocess(self, message):
         '''
