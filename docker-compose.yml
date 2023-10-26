@@ -1,7 +1,6 @@
 version: '3.1'
 services:
   simpleopenaibot:
-    build: https://github.com/jueves/simple_openai_bot.git
-       
+    build: .
     env_file:
       - .env

@@ -1,116 +1,25 @@
 import os
-import openai
 import telebot
-import whisper
+from audio_utils  import Whisper4Bot
+from text_utils import TextWizard
 
-# Load variables in .env file
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except:
-    print("Error loading dotenv, .env file won't be used.")
-
-# Load variables
-MODEL_TYPES = os.environ.get("MODELS", "tiny,base").split(",")
-DEFAULT_MODEL = os.environ.get("DEFAULT_MODEL", MODEL_TYPES[0])
 TELEGRAM_KEY = os.environ.get("TELEGRAM_KEY")
-CHATGPT_KEY = os.environ.get("CHATGPT_KEY")
-BUSY_MESSAGE = "El modelo Whisper está ocupado, inténtelo de nuevo en unos minutos."
+MODEL_TYPES = os.environ.get("MODELS", "tiny,base").split(",")
 
 with open("start.txt", "r", encoding="utf-8") as f:
     start_message = f.read()
 
 with open("help.txt", "r", encoding="utf-8") as f:
     help_message = f.read()
-for model in MODEL_TYPES:
-    help_message += "/" + model + "\n"
-
-with open("prompt.txt", "r", encoding="utf-8") as f:
-    prompt = f.read()
-
-# Setup chatGPT
-openai.api_key = CHATGPT_KEY
-messages_dic = {}
-
-# Setup Whisper
-audio2text = {"model": whisper.load_model(DEFAULT_MODEL), "type": DEFAULT_MODEL, "available":True}
+    for model in MODEL_TYPES:
+        help_message += "/" + model + "\n"
 
 # Setup Telegram bot
 bot = telebot.TeleBot(TELEGRAM_KEY)
 
-def get_answer(message, summary=False):
-    '''
-    Takes a Telebot message oject, passes its text to chatGPT
-    and returns the answer.
-    '''
-    if (message.from_user.id not in messages_dic):
-        messages_dic[message.from_user.id] =  [{'role': 'system', 'content': 'You are a intelligent assistant.'}]
-    
-    text = message.text
-    header = ""
-    if (summary):
-        text =  prompt + "\n" + text
-        header = "Resumen:\n"
-
-    messages_dic[message.from_user.id].append({"role": "user", "content": text})
-    chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages_dic[message.from_user.id])
-    reply = chat.choices[0].message.content
-    return(header + reply)
-
-
-def reply_transcription(message, answer):
-    # Manage long answers.
-    if (len(answer) < 300):
-        bot.reply_to(message, answer)
-    else:
-        txt_file_name = str(message.from_user.id) + "_transcript.txt"
-        with open(txt_file_name, "w") as text_file:
-            text_file.write(answer)
-        with open(txt_file_name, "r") as text_file:
-            bot.send_document(message.chat.id, reply_to_message_id=message.message_id, document=text_file)
-
-
-def transcribe_audio(message, file_name, language=None):
-    '''
-    Gets a message, the location of its audio file and the audio language.
-    Returns audio transcription.
-    '''
-    if audio2text["available"]:
-        audio2text["available"] = False
-        bot.reply_to(message, "Procesando audio...")
-        try:
-            result = audio2text["model"].transcribe(file_name, language=language)
-            answer = result["text"]
-        except:
-            answer = "Ocurrió un error. ¿Seguro que el link es correcto?"
-        audio2text["available"] = True
-    else:
-        answer = BUSY_MESSAGE
-    return(answer)
-    
-def preprocess_audio(message):
-    '''
-    Gets a message with some type of audio
-    Returns file name and language
-    '''
-    if hasattr(message.voice, "file_id"):
-        file_info = bot.get_file(message.voice.file_id)
-        lang = "es"
-    elif hasattr(message.document, "file_id"):
-        file_info = bot.get_file(message.document.file_id)
-        lang = None
-    else:
-        file_info = bot.get_file(message.audio.file_id)
-        lang = None
-
-    # Get audio file
-    downloaded_file = bot.download_file(file_info.file_path)
-    file_name = str(message.from_user.id) + ".ogg"
-    with open(file_name, 'wb') as new_file:
-        new_file.write(downloaded_file)
-
-    return(file_name, lang)
-    
+# Setup audio and text managers
+audio2text = Whisper4Bot(bot)
+textwizard = TextWizard(bot)
 
 @bot.message_handler(content_types=['voice', 'document', 'audio'])
 def audio_processing(message):
@@ -118,9 +27,7 @@ def audio_processing(message):
     Gets a message with audio.
     Replies to sender with audio transcription.
     '''
-    file_name, lang = preprocess_audio(message)
-    answer = transcribe_audio(message, file_name, language=lang)
-    reply_transcription(message, answer)
+    audio2text.transcribe(message)
 
 @bot.message_handler(func=lambda msg: True)
 def echo_all(message):
@@ -132,33 +39,17 @@ def echo_all(message):
     elif (message.text in ["/Ayuda", "/ayuda", "/help"]):
         answer = help_message
     elif (message.text[1:] in MODEL_TYPES):
-        if (message.text[1:] == audio2text["type"]):
-            answer = "El modelo {model} ya está activo.".format(model=message.text[1:])
-        elif audio2text["available"]:
-            audio2text["available"] = False
-            bot.reply_to(message, "Cargando modelo...")
-            audio2text["model"] = whisper.load_model(message.text[1:])
-            audio2text["type"] = message.text[1:]
-            audio2text["available"] = True
-            answer = "Modelo " + audio2text["type"] + " cargado."
-        else:
-            bot.reply_to(message, BUSY_MESSAGE)
+        answer = audio2text.load_model(message, message.text[1:])
     elif (message.text in ["/modelo", "/model"]):
-        answer = "El modelo de Whisper en uso es " + audio2text["type"]
+        answer = "El modelo de Whisper en uso es " + audio2text.type
     elif (message.text[:4] == "http"):
-        transcription = transcribe_audio(message, message.text, language=None)
-        reply_transcription(message, transcription)
-        answer = ""
+        answer = audio2text.transcribe(message)
     elif (message.text in ["/clear", "/limpiar"]):
-        try:
-            del messages_dic[message.from_user.id]
-        except KeyError:
-            pass
-        answer = "Historial de chatGPT borrado."
+        answer = textwizard.clear(message)
     elif (message.reply_to_message is not None):
-        answer = get_answer(message.reply_to_message, summary=True)
+        answer = textwizard.get_summary(message)
     else:
-        answer = get_answer(message)
+        answer = textwizard.get_answer(message)
 
     bot.reply_to(message, answer, parse_mode='Markdown')
 
