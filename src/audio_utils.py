@@ -70,7 +70,7 @@ class Whisper4Bot:
 
         if download_audio:
             downloaded_file = self.bot.download_file(file_info.file_path)
-            file_name = str(message.from_user.id) + ".ogg"
+            file_name = f"user_data/{str(message.from_user.id)}.ogg"
             with open(file_name, 'wb') as new_file:
                 new_file.write(downloaded_file)
 
@@ -81,7 +81,7 @@ class Whisper4Bot:
         if (len(answer) < self.longest_message):
             self.bot.reply_to(message, answer)
         else:
-            txt_file_name = str(message.from_user.id) + "_transcript.txt"
+            txt_file_name = f"user_data/{str(message.from_user.id)}_transcript.txt"
             with open(txt_file_name, "w") as text_file:
                 text_file.write(answer)
             with open(txt_file_name, "r") as text_file:

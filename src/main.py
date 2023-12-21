@@ -6,10 +6,10 @@ from text_utils import TextWizard
 TELEGRAM_KEY = os.environ.get("TELEGRAM_KEY")
 MODEL_TYPES = os.environ.get("MODELS", "tiny,base").split(",")
 
-with open("start.txt", "r", encoding="utf-8") as f:
+with open("text/start.txt", "r", encoding="utf-8") as f:
     start_message = f.read()
 
-with open("help.txt", "r", encoding="utf-8") as f:
+with open("text/help.txt", "r", encoding="utf-8") as f:
     help_message = f.read()
     for model in MODEL_TYPES:
         help_message += "/" + model + "\n"

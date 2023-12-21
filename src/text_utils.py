@@ -8,7 +8,7 @@ class TextWizard:
         self.bot = bot
         self.messages_dic = {}
         openai.api_key = chatGPT_key
-        with open("summarize_prompt.txt", "r", encoding="utf-8") as f:
+        with open("text/summarize_prompt.txt", "r", encoding="utf-8") as f:
             self.summarize_prompt = f.read()
 
 

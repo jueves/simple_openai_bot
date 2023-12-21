@@ -6,10 +6,10 @@ RUN apt-get update && apt-get install -y ffmpeg
 
 WORKDIR /simple_openai_bot
 
-COPY main.py text_utils.py audio_utils.py start.txt help.txt summarize_prompt.txt /simple_openai_bot/
+COPY src/* /simple_openai_bot/
 
-LABEL name=simple_openai_bot
+COPY text /simple_openai_bot/
 
-LABEL version=0.4
+RUN mkdir /simple_openai_bot/user_data
 
 CMD python main.py
