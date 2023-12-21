@@ -1,5 +1,4 @@
 from faster_whisper import WhisperModel
-from datetime import datetime
 import os
 
 DEFAULT_MODEL = os.environ.get("DEFAULT_MODEL")
