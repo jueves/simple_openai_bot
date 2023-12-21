@@ -1,14 +1,12 @@
-FROM python:3.11.2
+FROM python:3.11
 
-RUN pip install openai==0.28.0 openai-whisper==20230918 pyTelegramBotAPI==4.13.0
-
-RUN apt-get update && apt-get install -y ffmpeg
+RUN pip install openai==0.28.0 faster_whisper pyTelegramBotAPI
 
 WORKDIR /simple_openai_bot
 
 COPY src/* /simple_openai_bot/
 
-COPY text /simple_openai_bot/
+COPY text/* /simple_openai_bot/text/
 
 RUN mkdir /simple_openai_bot/user_data
 

@@ -1,4 +1,5 @@
-import whisper
+from faster_whisper import WhisperModel
+from datetime import datetime
 import os
 
 DEFAULT_MODEL = os.environ.get("DEFAULT_MODEL")
@@ -8,7 +9,7 @@ class Whisper4Bot:
     def __init__(self, bot, default_model=DEFAULT_MODEL, longest_message=LONGEST_MESSAGE):
         self.bot = bot
         self.type = default_model
-        self.model = whisper.load_model(default_model)       
+        self.model = WhisperModel(default_model, device="CPU", compute_type="int8")
         self.available = True
         self.longest_message = longest_message
 
@@ -19,7 +20,7 @@ class Whisper4Bot:
             self.available = False
             self.bot.reply_to(message, "Cargando modelo...")
             try:
-                self.model = whisper.load_model(model_type)
+                self.model = WhisperModel(model_type, device="CPU", compute_type="int8")
                 self.type = model_type
                 answer = "Modelo {model} cargado.".format(model=model_type)
             except Exception as e:
@@ -40,8 +41,11 @@ class Whisper4Bot:
             self.available = False
             self.bot.reply_to(message, "Procesando audio...")
             try:
-                result = self.model.transcribe(audio=file_name, language=language)
-                self.reply_transcription(message, result["text"])
+                segments, _ = self.model.transcribe(audio=file_name, language=language, beam_size=5)
+                text = ""
+                for segment in segments:
+                    text += segment.text
+                self.reply_transcription(message, text)
             except Exception as e:
                 self.bot.reply_to(message, "Ocurrió un error:\n{error}".format(error=e))
             self.available = True
