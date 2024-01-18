@@ -1,13 +1,13 @@
-import openai
 import os
+from openai import OpenAI
 
-CHATGPT_KEY = os.environ.get("CHATGPT_KEY")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 class TextWizard:
-    def __init__(self, bot, chatGPT_key=CHATGPT_KEY):
+    def __init__(self, bot):
         self.bot = bot
         self.messages_dic = {}
-        openai.api_key = chatGPT_key
+        self.client = OpenAI()
         with open("text/summarize_prompt.txt", "r", encoding="utf-8") as f:
             self.summarize_prompt = f.read()
 
@@ -23,7 +23,7 @@ class TextWizard:
         text = message.text
 
         self.messages_dic[message.from_user.id].append({"role": "user", "content": text})
-        chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=self.messages_dic[message.from_user.id])
+        chat = self.client.chat.completions.create(model="gpt-3.5-turbo", messages=self.messages_dic[message.from_user.id])
         reply = chat.choices[0].message.content
         return(reply)
     

@@ -1,6 +1,6 @@
 FROM python:3.11
 
-RUN pip install openai==0.28.0 faster_whisper pyTelegramBotAPI
+RUN pip install faster-whisper openai pyTelegramBotAPI
 
 WORKDIR /simple_openai_bot
 
