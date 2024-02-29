@@ -47,7 +47,7 @@ def echo_all(message):
     elif (message.text in ["/clear", "/limpiar"]):
         answer = textwizard.clear(message)
     elif (message.reply_to_message is not None):
-        answer = textwizard.get_summary(message)
+        answer = textwizard.get_summary(message.reply_to_message)
     else:
         answer = textwizard.get_answer(message)
 
