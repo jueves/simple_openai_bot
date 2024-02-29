@@ -14,16 +14,16 @@ class Whisper4Bot:
 
     def load_model(self, message, model_type):
         if model_type == self.type:
-            answer = "El modelo {model} ya está activo.".format(model=model_type)
+            answer = f"El modelo {model_type} ya está activo."
         elif self.available:
             self.available = False
             self.bot.reply_to(message, "Cargando modelo...")
             try:
                 self.model = WhisperModel(model_type, device="CPU", compute_type="int8")
                 self.type = model_type
-                answer = "Modelo {model} cargado.".format(model=model_type)
-            except Exception as e:
-                answer = "ERROR: El modelo no pudo ser cargado.\n{error}".format(error=e)
+                answer = f"Modelo {model_type} cargado."
+            except Exception as error:
+                answer = f"ERROR: El modelo no pudo ser cargado.\n{error}"
             self.available = True
         else:
             answer = "El modelo Whisper está ocupado, inténtelo de nuevo en unos minutos."
@@ -45,11 +45,12 @@ class Whisper4Bot:
                 for segment in segments:
                     text += segment.text
                 self.reply_transcription(message, text)
-            except Exception as e:
-                self.bot.reply_to(message, "Ocurrió un error:\n{error}".format(error=e))
+            except Exception as error:
+                self.bot.reply_to(message, f"Ocurrió un error:\n{error}")
             self.available = True
         else:
             self.bot.reply_to(message, "El modelo Whisper está ocupado, inténtelo de nuevo en unos minutos.")
+        return ""
     
     def preprocess(self, message):
         '''
@@ -80,7 +81,9 @@ class Whisper4Bot:
         return(file_name, lang)
     
     def reply_transcription(self, message, answer):
-        # Manage long answers.
+        '''
+        Manage long answers.
+        '''
         if (len(answer) < self.longest_message):
             self.bot.reply_to(message, answer)
         else:
