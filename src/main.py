@@ -29,10 +29,8 @@ def audio_processing(message):
     Gets a message with audio.
     Replies to sender with audio transcription.
     '''
-    if not whisper_allowed(message):
-        bot.reply_to(message, "No tienes permiso para usar Whisper.")
-        return
-    audio2text.transcribe(message)
+    if whisper_allowed(message):
+        audio2text.transcribe(message)
 
 @bot.message_handler(func=lambda msg: True)
 def echo_all(message):
@@ -47,15 +45,11 @@ def echo_all(message):
     elif (message.text[1:] in MODEL_TYPES):
         if whisper_allowed(message):
             answer = audio2text.load_model(message, message.text[1:])
-        else:
-            answer = "No tienes permiso para usar Whisper."
     elif (message.text in ["/modelo", "/model"]):
         answer = "El modelo de Whisper en uso es " + audio2text.type
     elif (message.text[:4] == "http"):
         if whisper_allowed(message):
             answer = audio2text.transcribe(message)
-        else:
-            answer = "No tienes permiso para usar Whisper."
 
     if answer is not None:
         bot.reply_to(message, answer, parse_mode='Markdown')
