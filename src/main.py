@@ -29,9 +29,8 @@ def audio_processing(message):
     Gets a message with audio.
     Replies to sender with audio transcription.
     '''
-    if not whisper_allowed(message):
-        return
-    audio2text.transcribe(message)
+    if whisper_allowed(message):
+        audio2text.transcribe(message)
 
 @bot.message_handler(func=lambda msg: True)
 def echo_all(message):
