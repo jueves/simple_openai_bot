@@ -5,6 +5,7 @@ from text_utils import TextWizard
 
 TELEGRAM_KEY = os.environ.get("TELEGRAM_KEY")
 MODEL_TYPES = os.environ.get("MODELS", "tiny,base").split(",")
+WHISPER_USER_ID = int(os.environ.get("TELEGRAM_USER_ID", 0))
 
 with open("text/start.txt", "r", encoding="utf-8") as f:
     start_message = f.read()
@@ -21,12 +22,18 @@ bot = telebot.TeleBot(TELEGRAM_KEY)
 audio2text = Whisper4Bot(bot)
 textwizard = TextWizard(bot)
 
+def whisper_allowed(message):
+    return WHISPER_USER_ID == 0 or message.from_user.id == WHISPER_USER_ID
+
 @bot.message_handler(content_types=['voice', 'document', 'audio'])
 def audio_processing(message):
     '''
     Gets a message with audio.
     Replies to sender with audio transcription.
     '''
+    if not whisper_allowed(message):
+        bot.reply_to(message, "No tienes permiso para usar Whisper.")
+        return
     audio2text.transcribe(message)
 
 @bot.message_handler(func=lambda msg: True)
@@ -39,11 +46,17 @@ def echo_all(message):
     elif (message.text in ["/Ayuda", "/ayuda", "/help"]):
         answer = help_message
     elif (message.text[1:] in MODEL_TYPES):
-        answer = audio2text.load_model(message, message.text[1:])
+        if whisper_allowed(message):
+            answer = audio2text.load_model(message, message.text[1:])
+        else:
+            answer = "No tienes permiso para usar Whisper."
     elif (message.text in ["/modelo", "/model"]):
         answer = "El modelo de Whisper en uso es " + audio2text.type
     elif (message.text[:4] == "http"):
-        answer = audio2text.transcribe(message)
+        if whisper_allowed(message):
+            answer = audio2text.transcribe(message)
+        else:
+            answer = "No tienes permiso para usar Whisper."
     elif (message.text in ["/clear", "/limpiar"]):
         answer = textwizard.clear(message)
     elif (message.reply_to_message is not None):
