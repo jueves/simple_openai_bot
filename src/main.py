@@ -1,7 +1,6 @@
 import os
 import telebot
 from audio_utils  import Whisper4Bot
-from text_utils import TextWizard
 
 TELEGRAM_KEY = os.environ.get("TELEGRAM_KEY")
 MODEL_TYPES = os.environ.get("MODELS", "tiny,base").split(",")
@@ -18,9 +17,8 @@ with open("text/help.txt", "r", encoding="utf-8") as f:
 # Setup Telegram bot
 bot = telebot.TeleBot(TELEGRAM_KEY)
 
-# Setup audio and text managers
+# Setup audio manager
 audio2text = Whisper4Bot(bot)
-textwizard = TextWizard(bot)
 
 def whisper_allowed(message):
     return WHISPER_USER_ID == 0 or message.from_user.id == WHISPER_USER_ID
@@ -41,6 +39,7 @@ def echo_all(message):
     '''
     Takes all incoming messages and returns answers.
     '''
+    answer = None
     if (message.text == "/start"):
         answer = start_message + help_message
     elif (message.text in ["/Ayuda", "/ayuda", "/help"]):
@@ -57,13 +56,8 @@ def echo_all(message):
             answer = audio2text.transcribe(message)
         else:
             answer = "No tienes permiso para usar Whisper."
-    elif (message.text in ["/clear", "/limpiar"]):
-        answer = textwizard.clear(message)
-    elif (message.reply_to_message is not None):
-        answer = textwizard.get_summary(message.reply_to_message)
-    else:
-        answer = textwizard.get_answer(message)
 
-    bot.reply_to(message, answer, parse_mode='Markdown')
+    if answer is not None:
+        bot.reply_to(message, answer, parse_mode='Markdown')
 
 bot.infinity_polling()
