@@ -89,7 +89,7 @@ class Whisper4Bot:
             if markdown:
                 # Formats answer_content as Markdown quotation with header
                 answer = (f"{self.get_header(message)}"
-                         f"\n^{answer.strip()}")
+                         f"\n>{answer.strip()}")
             self.bot.reply_to(message, answer)
         else:
             txt_file_name = f"user_data/{str(message.from_user.id)}_transcript.txt"
