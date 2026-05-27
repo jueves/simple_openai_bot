@@ -1,4 +1,5 @@
 from faster_whisper import WhisperModel # Almost twice as fast as OpenAI Whisper.
+from datetime import datetime
 import os
 
 DEFAULT_MODEL = os.environ.get("DEFAULT_MODEL")
@@ -93,3 +94,12 @@ class Whisper4Bot:
             with open(txt_file_name, "r") as text_file:
                 self.bot.send_document(message.chat.id, reply_to_message_id=message.message_id,
                                        document=text_file)
+
+    def get_header(self, message):
+        '''
+        Header for formating transcription in Markdown.
+        '''
+        message_time = datetime.fromtimestamp(message.date)
+        messsage_time_str = message_time.strftime("%d/%m/%Y %H:%M")
+        header = f"_Transcripción {messsage_time_str}_"
+        return header
