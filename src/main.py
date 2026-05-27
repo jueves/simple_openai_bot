@@ -49,10 +49,7 @@ def echo_all(message):
         answer = "El modelo de Whisper en uso es " + audio2text.type
     elif (message.text[:4] == "http"):
         if whisper_allowed(message):
-            # Formats answer_content as Markdown quotation with header
-            answer_content = audio2text.transcribe(message)
-            answer = f"""{audio2text.get_header(message)}
-                         ^{answer_content}"""
+            answer = audio2text.transcribe(message)
 
     if answer is not None:
         bot.reply_to(message, answer, parse_mode='Markdown')
