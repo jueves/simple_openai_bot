@@ -1,8 +1,8 @@
 # Simple OpenAI Telegram Bot
-- When it gets a text message it passes it to ChatGPT and returns the answer.  
+- ~~When it gets a text message it passes it to ChatGPT and returns the answer.~~
 - When it gets a voice note it passes it through Whisper and returns it as text.
 - You can also send a URL to an audio file and it will be transcribed.
-- If you reply to a message (no matter your reply) it returns a summary of the message you replied to.
+- ~~If you reply to a message (no matter your reply) it returns a summary of the message you replied to.~~
 
 
 # Installation
@@ -20,7 +20,7 @@ This is a Telegram Bot, you interact with it through Telegram chat.
 - `/modelo` Shows the Whisper model in use.
 - `/tiny`, `/base`, `/small`, `/medium` and `/large` change the Whisper model.
 - `/clear` Starts a new conversation with ChatGPT.
-- Any other text message is sent to chatGPT and its answer is returned.
+- ~~Any other text message is sent to chatGPT and its answer is returned.~~
 - Send any voice note and a transcription is sent back.
-- Reply (with whatever text) to a message and a summary is returned.
+- ~~Reply (with whatever text) to a message and a summary is returned.~~
 - Send a URL to an audio file and you will get a transcription. Depending on the model in use, the lenght of the audio and the hardware capabilities, it can be better to set a scheduled message for late at night, because the bot could get busy for hours long.
